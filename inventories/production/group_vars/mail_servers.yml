@@ -1,0 +1,32 @@
+---
+# Mail Server Configuration
+mail_server_type: "postfix"
+mail_server_hostname: "mail.example.com"
+email_domain: "example.com"
+
+# Postfix Configuration
+postfix_myhostname: "mail.example.com"
+postfix_mydomain: "example.com"
+postfix_myorigin: "$mydomain"
+postfix_mydestination: "$myhostname localhost.$mydomain localhost $mydomain"
+postfix_relayhost: ""
+postfix_inet_interfaces: "all"
+postfix_inet_protocols: "all"
+
+# Dovecot Configuration
+dovecot_protocols: "imap pop3 lmtp"
+dovecot_listen: "*"
+
+# SSL Configuration
+ssl_enabled: true
+ssl_cert_path: "/etc/ssl/certs"
+ssl_key_path: "/etc/ssl/private"
+ssl_cert_file: "mail.example.com.crt"
+ssl_key_file: "mail.example.com.key"
+
+# Firewall
+firewall_ports:
+  - "25"   # SMTP
+  - "587"  # Submission
+  - "993"  # IMAPS
+  - "995"  # POP3S
