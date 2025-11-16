@@ -1,0 +1,36 @@
+---
+- name: Deploy and configure mail servers
+  hosts: mail_servers
+  become: yes
+  vars_files:
+    - "../inventories/{{ inventory_dir }}/group_vars/mail_servers.yml"
+  
+  pre_tasks:
+    - name: Check if running on supported OS
+      fail:
+        msg: "This playbook only supports Debian/Ubuntu systems"
+      when: ansible_os_family != "Debian"
+  
+  roles:
+    - role: mail_server
+      tags: mail_server
+
+  post_tasks:
+    - name: Display deployment summary
+      debug:
+        msg:
+          - "Mail server deployment completed"
+          - "Hostname: {{ mail_server_hostname }}"
+          - "Domain: {{ email_domain }}"
+          - "SSL Enabled: {{ ssl_enabled }}"
+
+    - name: Send deployment notification
+      mail:
+        host: localhost
+        port: 25
+        subject: "Mail Server Deployment Complete - {{ inventory_hostname }}"
+        body: "Mail server {{ inventory_hostname }} has been successfully deployed with domain {{ email_domain }}"
+        from: "ansible@{{ email_domain }}"
+        to: "admin@{{ email_domain }}"
+      delegate_to: localhost
+      run_once: true
