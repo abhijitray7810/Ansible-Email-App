@@ -264,8 +264,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For issues and questions:
 - Create an issue on GitHub
-- Email: support@example.com
-- Documentation: https://docs.example.com/ansible-email
+- Email: roy055659@gmail.com
+- Documentation: 
 
 ## Acknowledgments
 
