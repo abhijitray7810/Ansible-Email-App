@@ -1,0 +1,16 @@
+#!/bin/bash
+# Ansible Managed - DO NOT EDIT MANUALLY
+
+QUEUE_SIZE=$(mailq | grep -c "^[A-F0-9]")
+MAX_QUEUE_SIZE=50
+
+if [ "$QUEUE_SIZE" -gt "$MAX_QUEUE_SIZE" ]; then
+    echo "CRITICAL: Email queue size is $QUEUE_SIZE" | mail -s "Email Queue Alert" admin@{{ email_domain }}
+    exit 2
+elif [ "$QUEUE_SIZE" -gt 20 ]; then
+    echo "WARNING: Email queue size is $QUEUE_SIZE" | mail -s "Email Queue Warning" admin@{{ email_domain }}
+    exit 1
+else
+    echo "OK: Email queue size is $QUEUE_SIZE"
+    exit 0
+fi
