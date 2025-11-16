@@ -1,0 +1,20 @@
+---
+- name: Configure SMTP relay servers
+  hosts: smtp_relays
+  become: yes
+  vars_files:
+    - "../inventories/{{ inventory_dir }}/group_vars/smtp_relays.yml"
+  
+  roles:
+    - role: smtp_relay
+      tags: smtp_relay
+
+  post_tasks:
+    - name: Test SMTP relay configuration
+      command: echo "Test message from Ansible" | mail -s "SMTP Relay Test" test@{{ email_domain }}
+      register: test_result
+      ignore_errors: yes
+
+    - name: Display test result
+      debug:
+        msg: "SMTP relay test completed with result: {{ test_result.rc }}"
