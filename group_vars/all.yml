@@ -1,0 +1,43 @@
+---
+# Global configuration for all environments
+ansible_user: deploy
+ansible_ssh_private_key_file: "~/.ssh/id_rsa"
+ansible_connection: ssh
+
+# Timezone configuration
+timezone: "UTC"
+
+# System configuration
+system_locale: "en_US.UTF-8"
+
+# Package management
+apt_update: true
+apt_upgrade: false
+
+# Security settings
+fail2ban_enabled: true
+ufw_enabled: true
+
+# Backup configuration
+backup_enabled: true
+backup_retention_days: 30
+backup_schedule: "0 2 * * *"
+
+# Monitoring configuration
+monitoring_alert_email: "admin@example.com"
+monitoring_critical_threshold: 95
+monitoring_warning_threshold: 80
+
+# Email users (encrypted with ansible-vault)
+mail_users: []
+# Example structure:
+# mail_users:
+#   - username: user1
+#     password: !vault |
+#           $ANSIBLE_VAULT;1.1;AES256
+#           ...
+
+# Database configuration (if using database for virtual users)
+mail_database_type: "sqlite"
+mail_database_host: "localhost"
+mail_database_name: "mailserver"
