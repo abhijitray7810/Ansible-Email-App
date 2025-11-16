@@ -1,0 +1,27 @@
+---
+- name: Setup email infrastructure monitoring
+  hosts: monitoring
+  become: yes
+  
+  pre_tasks:
+    - name: Include monitoring variables
+      include_vars: "../inventories/{{ inventory_dir }}/group_vars/all.yml"
+
+  roles:
+    - role: email_monitoring
+      tags: monitoring
+
+  tasks:
+    - name: Deploy centralized monitoring configuration
+      template:
+        src: monitoring-config.j2
+        dest: /opt/email-monitoring/monitoring-config.json
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Initialize monitoring database
+      command: >
+        /opt/email-monitoring/init-monitoring-db.sh
+      args:
+        creates: /var/lib/email-monitoring/monitoring.db
