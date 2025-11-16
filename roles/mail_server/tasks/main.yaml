@@ -1,0 +1,90 @@
+---
+- name: Update package cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+
+- name: Install mail server packages
+  package:
+    name:
+      - postfix
+      - dovecot-core
+      - dovecot-imapd
+      - dovecot-pop3d
+      - mailutils
+    state: present
+
+- name: Create SSL directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  loop:
+    - "{{ ssl_cert_path }}"
+    - "{{ ssl_key_path }}"
+
+- name: Copy SSL certificates
+  copy:
+    src: "files/ssl/{{ item }}"
+    dest: "{{ ssl_cert_path if 'crt' in item else ssl_key_path }}/{{ item }}"
+    owner: root
+    group: root
+    mode: "{{ '0644' if 'crt' in item else '0600' }}"
+  when: ssl_enabled
+  loop:
+    - "{{ ssl_cert_file }}"
+    - "{{ ssl_key_file }}"
+
+- name: Configure Postfix main.cf
+  template:
+    src: postfix/main.cf.j2
+    dest: /etc/postfix/main.cf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart postfix
+
+- name: Configure Postfix master.cf
+  template:
+    src: postfix/master.cf.j2
+    dest: /etc/postfix/master.cf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart postfix
+
+- name: Configure Dovecot
+  template:
+    src: dovecot/dovecot.conf.j2
+    dest: /etc/dovecot/dovecot.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart dovecot
+
+- name: Create virtual mail directory
+  file:
+    path: /var/mail/virtual
+    state: directory
+    owner: vmail
+    group: vmail
+    mode: 0755
+
+- name: Configure firewall for mail services
+  ufw:
+    port: "{{ item }}"
+    state: enabled
+    proto: tcp
+  loop: "{{ firewall_ports }}"
+
+- name: Ensure mail services are running and enabled
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - postfix
+    - dovecot
