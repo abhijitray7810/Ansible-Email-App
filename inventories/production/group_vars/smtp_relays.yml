@@ -1,0 +1,19 @@
+---
+# SMTP Relay Configuration
+smtp_relay_type: "postfix"
+smtp_relay_host: "smtp.example.com"
+smtp_relay_port: 587
+
+# Relay Authentication
+smtp_sasl_auth: true
+smtp_sasl_user: "relay@example.com"
+smtp_sasl_password: "{{ vault_smtp_password }}"
+
+# Security
+smtp_tls: true
+smtp_tls_verify: "may"
+
+# Network
+smtp_relay_networks:
+  - "192.168.1.0/24"
+  - "10.0.0.0/8"
