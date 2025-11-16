@@ -1,0 +1,50 @@
+---
+- name: Install SMTP relay packages
+  package:
+    name:
+      - postfix
+      - libsasl2-modules
+    state: present
+
+- name: Configure Postfix as SMTP relay
+  template:
+    src: postfix-main.cf.j2
+    dest: /etc/postfix/main.cf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart postfix
+
+- name: Configure SASL authentication
+  template:
+    src: sasl-passwd.j2
+    dest: /etc/postfix/sasl_passwd
+    owner: root
+    group: root
+    mode: 0600
+  when: smtp_sasl_auth
+
+- name: Create postfix SASL database
+  command: postmap /etc/postfix/sasl_passwd
+  when: smtp_sasl_auth
+  notify: reload postfix
+
+- name: Configure relay networks
+  lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: "^mynetworks ="
+    line: "mynetworks = {{ smtp_relay_networks | join(' ') }}"
+    state: present
+  notify: reload postfix
+
+- name: Ensure postfix is running and enabled
+  systemd:
+    name: postfix
+    state: started
+    enabled: yes
+
+- name: Open SMTP port in firewall
+  ufw:
+    port: "25"
+    state: enabled
+    proto: tcp
