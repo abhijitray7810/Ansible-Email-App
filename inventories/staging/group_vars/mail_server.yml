@@ -1,0 +1,18 @@
+---
+# Staging Mail Server Configuration
+mail_server_type: "postfix"
+mail_server_hostname: "mail.staging.example.com"
+email_domain: "staging.example.com"
+
+# Postfix Configuration
+postfix_myhostname: "mail.staging.example.com"
+postfix_mydomain: "staging.example.com"
+postfix_myorigin: "$mydomain"
+postfix_mydestination: "$myhostname localhost.$mydomain localhost $mydomain"
+
+# SSL Configuration
+ssl_enabled: false  # Use self-signed in staging
+
+# Debug settings for staging
+postfix_debug_level: "1"
+dovecot_debug: "yes"
