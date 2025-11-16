@@ -1,0 +1,70 @@
+---
+- name: Install monitoring tools
+  package:
+    name:
+      - nagios-plugins
+      - mailutils
+      - logwatch
+    state: present
+
+- name: Create monitoring scripts directory
+  file:
+    path: /opt/email-monitoring
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Deploy email queue monitoring script
+  template:
+    src: check_email_queue.sh.j2
+    dest: /opt/email-monitoring/check_email_queue.sh
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Deploy SSL certificate monitoring script
+  template:
+    src: check_ssl_cert.sh.j2
+    dest: /opt/email-monitoring/check_ssl_cert.sh
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Deploy service monitoring script
+  template:
+    src: check_services.sh.j2
+    dest: /opt/email-monitoring/check_services.sh
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Configure logwatch for email monitoring
+  template:
+    src: logwatch-conf.j2
+    dest: /etc/logwatch/conf/logwatch.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Create cron jobs for monitoring
+  cron:
+    name: "Check email queue"
+    minute: "*/5"
+    job: "/opt/email-monitoring/check_email_queue.sh"
+    user: root
+
+- name: Configure daily SSL certificate check
+  cron:
+    name: "Check SSL certificates"
+    hour: "6"
+    minute: "0"
+    job: "/opt/email-monitoring/check_ssl_cert.sh"
+    user: root
+
+- name: Configure service monitoring
+  cron:
+    name: "Check email services"
+    minute: "*/10"
+    job: "/opt/email-monitoring/check_services.sh"
+    user: root
